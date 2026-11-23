@@ -1,0 +1,17 @@
+target/
+*.log
+.idea/
+*.iml
+.vscode/
+
+# Local H2 files and generated runtime data
+data/*.mv.db
+data/*.trace.db
+data/*.lock.db
+.env
+
+# Copias locales de seguridad
+*.backup.json
+
+# Archivos generados por Maven Shade
+**/dependency-reduced-pom.xml
