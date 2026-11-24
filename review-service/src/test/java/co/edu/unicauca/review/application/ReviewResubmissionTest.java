@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import co.edu.unicauca.review.application.event.QuestionResubmittedEvent;
 import co.edu.unicauca.review.domain.model.ReviewAssignment;
 import co.edu.unicauca.review.domain.repository.ReviewAssignmentRepository;
-import co.edu.unicauca.review.infrastructure.messaging.ReviewEventPublisher;
+import co.edu.unicauca.review.application.port.ReviewEventPort;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,7 +24,7 @@ class ReviewResubmissionTest {
     private ReviewAssignmentRepository repository;
 
     @Mock
-    private ReviewEventPublisher eventPublisher;
+    private ReviewEventPort eventPublisher;
 
     @InjectMocks
     private ReviewApplicationService service;

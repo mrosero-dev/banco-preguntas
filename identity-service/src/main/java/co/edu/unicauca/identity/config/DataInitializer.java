@@ -26,18 +26,12 @@ public class DataInitializer {
                 return;
             }
 
-            identityService.register("Administrador", "admin@unicauca.edu.co",
-                    "admin123", Role.ADMIN);
-            identityService.register("Autor Uno", "autor1@unicauca.edu.co",
-                    "autor123", Role.AUTHOR);
-            identityService.register("Autor Dos", "autor2@unicauca.edu.co",
-                    "autor123", Role.AUTHOR);
-            identityService.register("Revisor Uno", "revisor1@unicauca.edu.co",
-                    "revisor123", Role.REVIEWER);
-            identityService.register("Revisor Dos", "revisor2@unicauca.edu.co",
-                    "revisor123", Role.REVIEWER);
-            identityService.register("Revisor Tres", "revisor3@unicauca.edu.co",
-                    "revisor123", Role.REVIEWER);
+            identityService.register("Administrador", "admin@unicauca.edu.co", Role.ADMIN);
+            identityService.register("Autor Uno", "autor1@unicauca.edu.co", Role.AUTHOR);
+            identityService.register("Autor Dos", "autor2@unicauca.edu.co", Role.AUTHOR);
+            identityService.register("Revisor Uno", "revisor1@unicauca.edu.co", Role.REVIEWER);
+            identityService.register("Revisor Dos", "revisor2@unicauca.edu.co", Role.REVIEWER);
+            identityService.register("Revisor Tres", "revisor3@unicauca.edu.co", Role.REVIEWER);
         };
     }
 }

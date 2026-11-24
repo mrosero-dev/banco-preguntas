@@ -246,9 +246,14 @@ public class QuestionController {
     }
 
     private void ensureAuthor(Long authorId) {
-        String authenticatedId = currentUserId();
-        if (authenticatedId != null && !authenticatedId.equals(String.valueOf(authorId))) {
-            throw new AccessDeniedException("Solo puedes operar sobre tus propias preguntas.");
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        // Without a JWT (isolated controller tests) there is nothing to compare.
+        if (authentication instanceof JwtAuthenticationToken) {
+            String authenticatedId = currentUserId();
+            if (authenticatedId == null
+                    || !authenticatedId.equals(String.valueOf(authorId))) {
+                throw new AccessDeniedException("Solo puedes operar sobre tus propias preguntas.");
+            }
         }
     }
 

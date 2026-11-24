@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import co.edu.unicauca.question.application.event.QuestionSubmittedEvent;
+import co.edu.unicauca.question.application.port.QuestionEventPort;
 import co.edu.unicauca.question.domain.builder.QuestionDirector;
 import co.edu.unicauca.question.domain.model.Question;
 import co.edu.unicauca.question.domain.model.QuestionOption;
@@ -13,7 +14,6 @@ import co.edu.unicauca.question.domain.model.QuestionStatus;
 import co.edu.unicauca.question.domain.repository.QuestionPage;
 import co.edu.unicauca.question.domain.repository.QuestionRepository;
 import co.edu.unicauca.question.domain.validation.QuestionValidationTemplate;
-import co.edu.unicauca.question.infrastructure.messaging.QuestionEventPublisher;
 
 @Service
 public class QuestionService {
@@ -21,13 +21,13 @@ public class QuestionService {
     private final QuestionRepository questionRepository;
     private final QuestionValidationTemplate questionValidator;
     private final QuestionDirector questionDirector;
-    private final QuestionEventPublisher questionEventPublisher;
+    private final QuestionEventPort questionEventPublisher;
 
     public QuestionService(
             QuestionRepository questionRepository,
             QuestionValidationTemplate questionValidator,
             QuestionDirector questionDirector,
-            QuestionEventPublisher questionEventPublisher) {
+            QuestionEventPort questionEventPublisher) {
 
         this.questionRepository = questionRepository;
         this.questionValidator = questionValidator;

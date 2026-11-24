@@ -1,20 +1,19 @@
 package co.edu.unicauca.identity.domain.model;
 
 /**
- * Represents a person who uses the question bank.
+ * Represents the local profile of a person who uses the question bank.
+ * Credentials are managed exclusively by Keycloak.
  */
 public class User {
 
     private Long id;
     private String fullName;
     private String email;
-    private String passwordHash;
     private Role role;
 
     public User(
             String fullName,
             String email,
-            String passwordHash,
             Role role) {
 
         if (fullName == null || fullName.isBlank()) {
@@ -25,22 +24,13 @@ public class User {
             throw new IllegalArgumentException("A valid email is required");
         }
 
-        if (passwordHash == null || passwordHash.isBlank()) {
-            throw new IllegalArgumentException("Password is required");
-        }
-
         if (role == null) {
             throw new IllegalArgumentException("Role is required");
         }
 
         this.fullName = fullName.trim();
         this.email = email.trim().toLowerCase();
-        this.passwordHash = passwordHash;
         this.role = role;
-    }
-
-    public boolean passwordMatches(String candidateHash) {
-        return passwordHash.equals(candidateHash);
     }
 
     public Long getId() {
@@ -55,10 +45,6 @@ public class User {
         return email;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
     public Role getRole() {
         return role;
     }
@@ -70,10 +56,9 @@ public class User {
             Long id,
             String fullName,
             String email,
-            String passwordHash,
             Role role) {
 
-        User user = new User(fullName, email, passwordHash, role);
+        User user = new User(fullName, email, role);
         user.id = id;
 
         return user;

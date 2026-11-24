@@ -19,7 +19,6 @@ public class UserMapper {
     public void updateRecord(User user, UserRecord record) {
         record.setFullName(user.getFullName());
         record.setEmail(user.getEmail());
-        record.setPasswordHash(user.getPasswordHash());
         record.setRole(user.getRole());
     }
 
@@ -28,7 +27,6 @@ public class UserMapper {
                 record.getId(),
                 record.getFullName(),
                 record.getEmail(),
-                record.getPasswordHash(),
                 record.getRole()
         );
     }

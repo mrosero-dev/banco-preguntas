@@ -8,7 +8,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import co.edu.unicauca.identity.domain.exception.InvalidCredentialsException;
 import co.edu.unicauca.identity.domain.exception.UserNotFoundException;
 
 @RestControllerAdvice
@@ -20,15 +19,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(exception.getMessage());
-    }
-
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<String> handleInvalidCredentials(
-            InvalidCredentialsException exception) {
-
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
                 .body(exception.getMessage());
     }
 

@@ -19,7 +19,7 @@ import co.edu.unicauca.question.domain.model.QuestionStatus;
 import co.edu.unicauca.question.domain.repository.QuestionPage;
 import co.edu.unicauca.question.domain.repository.QuestionRepository;
 import co.edu.unicauca.question.domain.validation.QuestionValidationTemplate;
-import co.edu.unicauca.question.infrastructure.messaging.QuestionEventPublisher;
+import co.edu.unicauca.question.application.port.QuestionEventPort;
 
 @ExtendWith(MockitoExtension.class)
 class QuestionListingServiceTest {
@@ -34,7 +34,7 @@ class QuestionListingServiceTest {
     private QuestionDirector questionDirector;
 
     @Mock
-    private QuestionEventPublisher questionEventPublisher;
+    private QuestionEventPort questionEventPublisher;
 
     private QuestionService questionService;
 

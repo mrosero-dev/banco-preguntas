@@ -27,7 +27,7 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SERVICE')")
     public ResponseEntity<List<UserResponse>> findUsers(
             @RequestParam(required = false) Role role) {
 

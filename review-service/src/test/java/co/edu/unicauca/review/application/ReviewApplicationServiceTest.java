@@ -4,7 +4,7 @@ import co.edu.unicauca.review.domain.model.ReviewAssignment;
 import co.edu.unicauca.review.domain.model.ReviewStatus;
 import co.edu.unicauca.review.domain.repository.ReviewAssignmentRepository;
 import co.edu.unicauca.review.domain.exception.ReviewAssignmentNotFoundException;
-import co.edu.unicauca.review.infrastructure.messaging.ReviewEventPublisher;
+import co.edu.unicauca.review.application.port.ReviewEventPort;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +27,7 @@ class ReviewApplicationServiceTest {
     private ReviewAssignmentRepository repository;
 
     @Mock
-    private ReviewEventPublisher eventPublisher;
+    private ReviewEventPort eventPublisher;
 
     @InjectMocks
     private ReviewApplicationService service;
@@ -35,7 +35,9 @@ class ReviewApplicationServiceTest {
     @Test
     void shouldAssignReviewersSuccessfully() {
 
-        // Arrange
+        // Arrange: the question was already sent to review (pending)
+        when(repository.findByQuestionId(100L))
+                .thenReturn(Optional.of(new ReviewAssignment(100L, 10L)));
         when(repository.save(any(ReviewAssignment.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 

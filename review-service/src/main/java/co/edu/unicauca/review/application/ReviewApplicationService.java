@@ -13,7 +13,7 @@ import co.edu.unicauca.review.domain.repository.ReviewAssignmentRepository;
 import co.edu.unicauca.review.domain.exception.ReviewAssignmentNotFoundException;
 import co.edu.unicauca.review.domain.exception.ReviewConflictException;
 import co.edu.unicauca.review.application.event.ReviewCompletedEvent;
-import co.edu.unicauca.review.infrastructure.messaging.ReviewEventPublisher;
+import co.edu.unicauca.review.application.port.ReviewEventPort;
 import co.edu.unicauca.review.application.event.ReviewAssignedEvent;
 import co.edu.unicauca.review.application.event.QuestionResubmittedEvent;
 
@@ -21,11 +21,11 @@ import co.edu.unicauca.review.application.event.QuestionResubmittedEvent;
 public class ReviewApplicationService {
 
     private final ReviewAssignmentRepository repository;
-    private final ReviewEventPublisher eventPublisher;
+    private final ReviewEventPort eventPublisher;
 
     public ReviewApplicationService(
             ReviewAssignmentRepository repository,
-            ReviewEventPublisher eventPublisher) {
+            ReviewEventPort eventPublisher) {
 
         this.repository = repository;
         this.eventPublisher = eventPublisher;
@@ -91,11 +91,14 @@ public class ReviewApplicationService {
                 );
         }
 
+        // Only questions already registered as pending review (sent by the
+        // author) can receive reviewers.
         ReviewAssignment assignment =
                 repository.findByQuestionId(questionId)
-                        .orElseGet(() ->
-                                new ReviewAssignment(questionId, authorId)
-                        );
+                        .orElseThrow(() -> new ReviewConflictException(
+                                "Reviewers can only be assigned to questions "
+                                        + "pending review"
+                        ));
 
         if (!assignment.getReviews().isEmpty()) {
                 throw new ReviewConflictException(

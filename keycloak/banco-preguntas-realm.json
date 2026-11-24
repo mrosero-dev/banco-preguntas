@@ -204,6 +204,14 @@
       "realmRoles": [
         "REVIEWER"
       ]
+    },
+    {
+      "username": "service-account-notification-service",
+      "enabled": true,
+      "serviceAccountClientId": "notification-service",
+      "realmRoles": [
+        "SERVICE"
+      ]
     }
   ]
 }

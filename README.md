@@ -20,7 +20,11 @@ Historias de usuario: HU-1.1 a HU-1.3 (segundo corte) y HU-2.1 a HU-2.3 (tercer 
 - **Seguridad**: Keycloak emite JWT con los roles `ADMIN`, `AUTHOR` y `REVIEWER`; cada servicio valida el token como OAuth2 Resource Server y autoriza por rol y por propietario.
 - **Despliegue**: Docker Compose con volúmenes independientes para cada base de datos.
 
-Detalle en [`docs/arquitectura-tercer-corte.md`](docs/arquitectura-tercer-corte.md) (diagramas C4 en Mermaid) y [`docs/patrones-y-calidad.md`](docs/patrones-y-calidad.md) (patrones de diseño y escenarios de calidad).
+La capa `application` define puertos de salida (por ejemplo `QuestionEventPort` y `ReviewEventPort`) que implementa la infraestructura con RabbitMQ, de modo que la dependencia apunta siempre hacia el dominio.
+
+**Patrones de diseño:** Builder y Director (creación de preguntas), Template Method (validación), State (ciclo de vida de la pregunta), Factory Method y Decorator (notificaciones), Adapter (proveedor de correo) y Ports & Adapters (repositorios y mensajería).
+
+Repositorio: https://github.com/mrosero-dev/banco-preguntas
 
 ## Tecnología
 
@@ -35,7 +39,7 @@ identity-service/      perfiles de usuario y consulta de identidad
 notification-service/  notificaciones internas y correo simulado
 frontend-client/       cliente de escritorio Swing
 keycloak/              realm importable (roles, clientes y usuarios de demostración)
-docs/                  arquitectura, patrones y escenarios de calidad
+tests/                 colección Postman, prueba de carga k6 y evidencias de seguridad
 docker-compose.yml     orquestación del backend
 ```
 
@@ -44,7 +48,7 @@ docker-compose.yml     orquestación del backend
 | Componente | Puerto | Función |
 |---|---:|---|
 | question-service | 8080 | Creación, validación, consulta y estados de preguntas |
-| identity-service | 8081 | Perfiles locales y consulta de identidad; autenticación delegada a Keycloak |
+| identity-service | 8081 | Perfiles locales (sin credenciales) y consulta de identidad; autenticación delegada a Keycloak |
 | review-service | 8082 | Asignación, evaluación e historial de rondas de revisión |
 | notification-service | 8083 | Notificaciones internas y correo simulado |
 | RabbitMQ | 5672 / 15672 | Mensajería asíncrona y consola de administración |
@@ -121,6 +125,8 @@ Cada microservicio usa su propia base H2 en modo archivo. Docker Compose monta v
 
 RabbitMQ y Keycloak también tienen volúmenes persistentes. Los datos sobreviven a `docker compose down` y a reinicios normales.
 
+Si actualizas desde una versión anterior, ejecuta `docker compose down -v`: `identity-service` ya no almacena contraseñas (solo Keycloak las gestiona) y el esquema de su base cambió.
+
 Para borrar intencionalmente todos los datos y reiniciar las cuentas/realm desde cero:
 
 ```bash
@@ -142,6 +148,8 @@ Versionado del contenido: al crear la versión mejorada (`POST /api/questions/{i
 - Los endpoints de creación/edición de preguntas requieren AUTHOR; la asignación requiere ADMIN; la evaluación requiere REVIEWER.
 - El acceso a la historia de una pregunta valida además que el autor autenticado sea el propietario.
 - El cliente Swing utiliza el token Bearer para las llamadas REST.
+
+La cuenta de servicio `notification-service` tiene el rol `SERVICE` (declarado en el realm) para consultar a los administradores en Identity Service. El realm solo se importa al crear el volumen de Keycloak: si ya existía uno de una versión anterior, ejecuta `docker compose down -v` y vuelve a levantar para que se aplique.
 
 El flujo de contraseña directa está habilitado únicamente para facilitar la demostración del cliente de escritorio en el entorno académico. Para un despliegue real debe migrarse a Authorization Code + PKCE y usar HTTPS, secretos fuera del repositorio y políticas de producción de Keycloak.
 
@@ -185,5 +193,4 @@ Las pruebas de controlador usan configuración de seguridad deshabilitada en `sr
 - La escalabilidad se soporta arquitectónicamente mediante microservicios y mensajería; no se afirma una medición de carga sin ejecutar pruebas de rendimiento.
 - H2 persistente por volumen es adecuado para el entorno académico. Para producción se recomienda una base de datos administrada (p. ej. PostgreSQL) por servicio.
 - El cliente Swing muestra el historial de rondas; las versiones anteriores del contenido se consultan por la API (`/versions`) y aún no tienen pantalla.
-- La documentación de arquitectura final en PDF está en `docs/Documento-arquitectura-tercer-corte.pdf`.
 - El flujo de contraseña de Keycloak y las credenciales de `docker-compose.yml` son de laboratorio; ver sección Seguridad.

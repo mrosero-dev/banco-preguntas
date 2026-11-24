@@ -30,7 +30,7 @@ class IdentityControllersTest {
     @Test
     void shouldListUsersByRole() throws Exception {
         when(service.findUsers(Role.REVIEWER)).thenReturn(List.of(
-                User.restore(4L, "Rev", "r@b.com", "hash", Role.REVIEWER)));
+                User.restore(4L, "Rev", "r@b.com", Role.REVIEWER)));
 
         mockMvc.perform(get("/api/users").param("role", "REVIEWER"))
                 .andExpect(status().isOk())
@@ -41,7 +41,7 @@ class IdentityControllersTest {
     @Test
     void shouldFindUserById() throws Exception {
         when(service.findById(2L)).thenReturn(
-                User.restore(2L, "Ana", "a@b.com", "hash", Role.AUTHOR));
+                User.restore(2L, "Ana", "a@b.com", Role.AUTHOR));
 
         mockMvc.perform(get("/api/users/2"))
                 .andExpect(status().isOk())

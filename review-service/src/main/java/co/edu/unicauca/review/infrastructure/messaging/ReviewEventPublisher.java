@@ -7,10 +7,11 @@ import co.edu.unicauca.review.application.event.QuestionResubmittedEvent;
 
 import co.edu.unicauca.review.application.event.ReviewAssignedEvent;
 import co.edu.unicauca.review.application.event.ReviewCompletedEvent;
+import co.edu.unicauca.review.application.port.ReviewEventPort;
 import co.edu.unicauca.review.config.ReviewRabbitMQConfig;
 
 @Component
-public class ReviewEventPublisher {
+public class ReviewEventPublisher implements ReviewEventPort {
 
     private final RabbitTemplate rabbitTemplate;
 
@@ -18,6 +19,7 @@ public class ReviewEventPublisher {
         this.rabbitTemplate = rabbitTemplate;
     }
 
+    @Override
     public void publishReviewAssigned(ReviewAssignedEvent event) {
 
         // Notify Question Service (moves the question to EN REVISION).
@@ -33,6 +35,7 @@ public class ReviewEventPublisher {
         );
     }
 
+    @Override
     public void publishReviewCompleted(ReviewCompletedEvent event) {
 
     // Notify Notification Service.
@@ -48,6 +51,7 @@ public class ReviewEventPublisher {
         );
     }
 
+    @Override
     public void publishQuestionResubmitted(QuestionResubmittedEvent event) {
 
         // Notify Notification Service (administrators and previous reviewers).

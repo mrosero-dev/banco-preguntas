@@ -128,6 +128,47 @@ class SingleChoiceQuestionValidatorTest {
     }
 
     @Test
+    void shouldRejectMoreThanOneDirectQuestion() {
+        Question question = new Question(
+                1L,
+                "What is software engineering? And what is a requirement?",
+                "Context",
+                "Medium",
+                "Computing",
+                "Software Engineering",
+                "Requirements",
+                "Problem solving",
+                "Justification",
+                "Source"
+        );
+        question.addOption(new QuestionOption("Option A", true));
+        question.addOption(new QuestionOption("Option B", false));
+        question.addOption(new QuestionOption("Option C", false));
+        question.addOption(new QuestionOption("Option D", false));
+        question.addOption(new QuestionOption("Option E", false));
+
+        assertThrows(
+                InvalidQuestionException.class,
+                () -> validator.validate(question)
+        );
+    }
+
+    @Test
+    void shouldRejectProhibitedExpressionWithPunctuationAndAccents() {
+        Question question = createValidQuestion();
+
+        question.updateOptionText(
+                question.getOptions().get(1),
+                "Todas las anteriores son correctas."
+        );
+
+        assertThrows(
+                InvalidQuestionException.class,
+                () -> validator.validate(question)
+        );
+    }
+
+    @Test
     void shouldRejectNoneOfPreviousOptionsExpression() {
         Question question = createValidQuestion();
 
