@@ -21,6 +21,16 @@ public class RabbitMQConfig {
     public static final String QUESTION_RESUBMITTED_QUEUE =
             "question.resubmitted.notification";
 
+    public static final String QUESTION_SUBMITTED_NOTIFICATION_QUEUE =
+            "question.submitted.notification";
+
+    @Bean
+    public Queue questionSubmittedNotificationQueue() {
+        return QueueBuilder
+                .durable(QUESTION_SUBMITTED_NOTIFICATION_QUEUE)
+                .build();
+    }
+
     @Bean
     public Queue reviewCompletedQueue() {
         return QueueBuilder

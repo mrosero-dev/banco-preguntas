@@ -42,6 +42,22 @@ class ReviewResubmissionTest {
     }
 
     @Test
+    void shouldAnnounceFirstSubmissionButNotResubmissionAsNewQuestion() {
+        when(repository.findByQuestionId(100L)).thenReturn(Optional.empty());
+        when(repository.save(any(ReviewAssignment.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.registerPendingQuestion(100L, 10L);
+
+        org.mockito.ArgumentCaptor<co.edu.unicauca.review.application.event.QuestionSubmittedEvent> captor =
+                org.mockito.ArgumentCaptor.forClass(
+                        co.edu.unicauca.review.application.event.QuestionSubmittedEvent.class);
+        verify(eventPublisher).publishQuestionSubmitted(captor.capture());
+        assertEquals(100L, captor.getValue().getQuestionId());
+        assertEquals(10L, captor.getValue().getAuthorId());
+    }
+
+    @Test
     void shouldStartNewRoundWhenRejectedQuestionIsSentAgain() {
         ReviewAssignment old = new ReviewAssignment(100L, 10L);
         old.assignReviewer(20L);
@@ -73,6 +89,7 @@ class ReviewResubmissionTest {
         assertEquals(100L, captor.getValue().getQuestionId());
         assertEquals(2, captor.getValue().getVersion());
         assertEquals(java.util.List.of(20L), captor.getValue().getPreviousReviewerIds());
+        verify(eventPublisher, never()).publishQuestionSubmitted(any());
     }
 
     @Test
@@ -87,5 +104,6 @@ class ReviewResubmissionTest {
         assertEquals(1, result.getReviews().size());
         verify(repository, never()).save(any());
         verify(eventPublisher, never()).publishQuestionResubmitted(any());
+        verify(eventPublisher, never()).publishQuestionSubmitted(any());
     }
 }

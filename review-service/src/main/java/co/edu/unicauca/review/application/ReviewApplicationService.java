@@ -16,6 +16,7 @@ import co.edu.unicauca.review.application.event.ReviewCompletedEvent;
 import co.edu.unicauca.review.application.port.ReviewEventPort;
 import co.edu.unicauca.review.application.event.ReviewAssignedEvent;
 import co.edu.unicauca.review.application.event.QuestionResubmittedEvent;
+import co.edu.unicauca.review.application.event.QuestionSubmittedEvent;
 
 @Service
 public class ReviewApplicationService {
@@ -44,7 +45,14 @@ public class ReviewApplicationService {
                 repository.findByQuestionId(questionId);
 
         if (existing.isEmpty()) {
-            return repository.save(new ReviewAssignment(questionId, authorId));
+            ReviewAssignment created =
+                    repository.save(new ReviewAssignment(questionId, authorId));
+
+            // First submission: let the administrators know.
+            eventPublisher.publishQuestionSubmitted(
+                    new QuestionSubmittedEvent(questionId, authorId));
+
+            return created;
         }
 
         // The question was corrected and sent again: start a new round.

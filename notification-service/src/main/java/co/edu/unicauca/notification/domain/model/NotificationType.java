@@ -5,6 +5,7 @@ package co.edu.unicauca.notification.domain.model;
  */
 public enum NotificationType {
 
+    QUESTION_SUBMITTED,
     REVIEW_ASSIGNED,
     REVIEW_APPROVED,
     REVIEW_REJECTED,

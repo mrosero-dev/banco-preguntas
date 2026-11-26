@@ -7,7 +7,7 @@ Proyecto académico de Ingeniería de Software II. Incluye cuatro microservicios
 Un banco de preguntas de selección múltiple con única respuesta, al estilo Saber Pro, con un ciclo de revisión entre docentes:
 
 1. El **autor** crea la pregunta (contexto, pregunta directa, cuatro distractores, respuesta correcta, justificación, bibliografía, competencia, tema, subtema y dificultad). El sistema aplica una validación estructural y la guarda en BORRADOR.
-2. El autor la envía a revisión (PENDIENTE DE REVISIÓN) y el **administrador** asigna de uno a tres revisores (EN REVISIÓN); los revisores reciben una notificación.
+2. El autor la envía a revisión (PENDIENTE DE REVISIÓN) y el **administrador** asigna de uno a tres revisores (EN REVISIÓN); los revisores reciben una notificación. El administrador también es notificado cuando un autor envía una pregunta a revisión.
 3. Cada **revisor** aprueba o rechaza (rechazar exige observaciones). Con todas las evaluaciones, la pregunta pasa a APROBADA, o a RECHAZADA si hay al menos un rechazo, y se notifica al autor y al administrador.
 4. El autor consulta el historial de revisiones y sus observaciones, crea una versión mejorada de una pregunta RECHAZADA y la reenvía en una nueva ronda.
 
@@ -36,7 +36,7 @@ Java 17, Spring Boot 3.5, Spring Security (OAuth2 Resource Server), Spring Data 
 question-service/      preguntas, validación estructural, estados y listado
 review-service/        asignación de revisores, evaluaciones, rondas e historial
 identity-service/      perfiles de usuario y consulta de identidad
-notification-service/  notificaciones internas y correo simulado
+notification-service/  notificaciones internas y correo por SMTP (MailHog en Compose)
 frontend-client/       cliente de escritorio Swing
 keycloak/              realm importable (roles, clientes y usuarios de demostración)
 tests/                 colección Postman, prueba de carga k6 y evidencias de seguridad
@@ -50,7 +50,7 @@ docker-compose.yml     orquestación del backend
 | question-service | 8080 | Creación, validación, consulta y estados de preguntas |
 | identity-service | 8081 | Perfiles locales (sin credenciales) y consulta de identidad; autenticación delegada a Keycloak |
 | review-service | 8082 | Asignación, evaluación e historial de rondas de revisión |
-| notification-service | 8083 | Notificaciones internas y correo simulado |
+| notification-service | 8083 | Notificaciones internas y correo por SMTP real (MailHog en Compose) |
 | RabbitMQ | 5672 / 15672 | Mensajería asíncrona y consola de administración |
 | MailHog | 1025 / 8025 | Servidor SMTP de pruebas y bandeja web donde se ven los correos reales enviados |
 | Keycloak | 8180 | Emisión y validación de tokens JWT |
@@ -190,7 +190,7 @@ Las pruebas de controlador usan configuración de seguridad deshabilitada en `sr
 ## Limitaciones conocidas
 
 - El correo se envía por SMTP real a MailHog en Docker Compose (`NOTIFICATION_EMAIL_MODE=smtp`). Para usar otro servidor SMTP basta con cambiar `SPRING_MAIL_HOST` y las demás propiedades `spring.mail.*`. Fuera de Compose el modo por defecto es simulado (consola).
-- La escalabilidad se soporta arquitectónicamente mediante microservicios y mensajería; no se afirma una medición de carga sin ejecutar pruebas de rendimiento.
+- La escalabilidad se soporta arquitectónicamente mediante microservicios y mensajería, y se midió con k6 (`tests/load/k6-load-test.js`): 5 usuarios virtuales durante 30 s, 231 solicitudes, 0 % de fallos, 231 de 231 verificaciones correctas y percentil 95 de 13,76 ms (umbral: menor a 1 s). Con `-e VUS=<n>` se puede repetir con otro nivel de carga.
 - H2 persistente por volumen es adecuado para el entorno académico. Para producción se recomienda una base de datos administrada (p. ej. PostgreSQL) por servicio.
 - El cliente Swing muestra el historial de rondas; las versiones anteriores del contenido se consultan por la API (`/versions`) y aún no tienen pantalla.
 - El flujo de contraseña de Keycloak y las credenciales de `docker-compose.yml` son de laboratorio; ver sección Seguridad.

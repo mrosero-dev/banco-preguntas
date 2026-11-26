@@ -113,6 +113,7 @@ public final class NotificationsView extends JFrame {
 
     static String typeLabel(String type) {
         return switch (type) {
+            case "QUESTION_SUBMITTED" -> "Nueva pregunta enviada";
             case "REVIEW_ASSIGNED" -> "Revisión asignada";
             case "REVIEW_APPROVED" -> "Pregunta aprobada";
             case "REVIEW_REJECTED" -> "Pregunta rechazada";

@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import co.edu.unicauca.notification.application.client.UserContactDto;
 import co.edu.unicauca.notification.application.client.IdentityGateway;
 import co.edu.unicauca.notification.application.event.QuestionResubmittedEvent;
+import co.edu.unicauca.notification.application.event.QuestionSubmittedEvent;
 import co.edu.unicauca.notification.application.event.ReviewAssignedEvent;
 import co.edu.unicauca.notification.application.event.ReviewCompletedEvent;
 import co.edu.unicauca.notification.domain.exception.NotificationNotFoundException;
@@ -55,6 +56,21 @@ public class NotificationService {
 
         for (Long reviewerId : event.getReviewerIds()) {
             deliver(reviewerId, NotificationType.REVIEW_ASSIGNED, message);
+        }
+    }
+
+    /**
+     * Tells the administrators that an author sent a new question to review.
+     */
+    @Transactional
+    public void notifyQuestionSubmitted(QuestionSubmittedEvent event) {
+
+        String message = "El autor #" + event.getAuthorId()
+                + " envió la pregunta #" + event.getQuestionId()
+                + " a revisión.";
+
+        for (UserContactDto admin : identityGateway.findByRole(ADMIN_ROLE)) {
+            deliver(admin.id(), NotificationType.QUESTION_SUBMITTED, message);
         }
     }
 

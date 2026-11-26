@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import co.edu.unicauca.notification.application.client.UserContactDto;
 import co.edu.unicauca.notification.application.client.IdentityGateway;
 import co.edu.unicauca.notification.application.event.QuestionResubmittedEvent;
+import co.edu.unicauca.notification.application.event.QuestionSubmittedEvent;
 import co.edu.unicauca.notification.application.event.ReviewAssignedEvent;
 import co.edu.unicauca.notification.application.event.ReviewCompletedEvent;
 import co.edu.unicauca.notification.domain.exception.NotificationNotFoundException;
@@ -75,6 +76,38 @@ class NotificationServiceTest {
         verify(repository).save(any(Notification.class));
         verify(inAppSender).send(eq("user-4"), anyString());
         verifyNoInteractions(emailSender);
+    }
+
+    @Test
+    void shouldNotifyEveryAdministratorWhenAuthorSubmitsQuestion() {
+        when(identityGateway.findByRole("ADMIN")).thenReturn(List.of(
+                new UserContactDto(1L, "Admin", "admin@u.co", "ADMIN"),
+                new UserContactDto(9L, "Admin 2", "admin2@u.co", "ADMIN")));
+        when(identityGateway.findById(1L)).thenReturn(Optional.of(
+                new UserContactDto(1L, "Admin", "admin@u.co", "ADMIN")));
+        when(identityGateway.findById(9L)).thenReturn(Optional.of(
+                new UserContactDto(9L, "Admin 2", "admin2@u.co", "ADMIN")));
+
+        service.notifyQuestionSubmitted(new QuestionSubmittedEvent(100L, 2L));
+
+        ArgumentCaptor<Notification> captor =
+                ArgumentCaptor.forClass(Notification.class);
+        verify(repository, times(2)).save(captor.capture());
+        assertTrue(captor.getAllValues().stream().allMatch(
+                n -> n.getType() == NotificationType.QUESTION_SUBMITTED));
+        verify(emailSender).send(eq("admin@u.co"), contains("#100"));
+        verify(emailSender).send(eq("admin2@u.co"), contains("#100"));
+        verify(inAppSender).send(eq("user-1"), contains("#100"));
+        verify(inAppSender).send(eq("user-9"), contains("#100"));
+    }
+
+    @Test
+    void shouldNotNotifyAnyoneOnSubmissionWhenThereAreNoAdministrators() {
+        when(identityGateway.findByRole("ADMIN")).thenReturn(List.of());
+
+        service.notifyQuestionSubmitted(new QuestionSubmittedEvent(100L, 2L));
+
+        verifyNoInteractions(repository, emailSender, inAppSender);
     }
 
     @Test
