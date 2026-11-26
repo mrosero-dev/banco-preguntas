@@ -54,7 +54,7 @@ public class GUIQuestions extends JFrame {
 
     private final JButton view = new JButton("VER COMPLETA");
     private final JButton modify = new JButton("MODIFICAR");
-    private final JButton saveChanges = new JButton("GUARDAR MODIFICACIÓN");
+    private boolean editing = false;
     private final JButton send = new JButton("ENVIAR A REVISIÓN");
     private final JButton backToDraft = new JButton("CREAR NUEVA VERSIÓN");
     private final JButton historyButton = new JButton("HISTORIAL DE REVISIONES");
@@ -155,10 +155,17 @@ public class GUIQuestions extends JFrame {
         right.setBorder(BorderFactory.createTitledBorder("Pregunta"));
         right.add(new JScrollPane(form), BorderLayout.CENTER);
 
+        // One row: MODIFICAR turns into GUARDAR CAMBIOS while editing, so the
+        // save action can never be pushed out of view.
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         view.addActionListener(e -> showFull());
-        modify.addActionListener(e -> startEditing());
-        saveChanges.addActionListener(e -> saveChanges());
+        modify.addActionListener(e -> {
+            if (editing) {
+                saveChanges();
+            } else {
+                startEditing();
+            }
+        });
         send.addActionListener(e -> sendForReview());
         backToDraft.addActionListener(e -> returnToDraft());
         historyButton.addActionListener(e -> showHistory());
@@ -167,7 +174,6 @@ public class GUIQuestions extends JFrame {
         buttons.add(send);
         buttons.add(backToDraft);
         buttons.add(historyButton);
-        buttons.add(saveChanges);
         right.add(buttons, BorderLayout.SOUTH);
         add(right, BorderLayout.CENTER);
 
@@ -235,7 +241,7 @@ public class GUIQuestions extends JFrame {
         }
 
         form.setEditable(false);
-        saveChanges.setEnabled(false);
+        setEditing(false);
         view.setEnabled(question != null);
         modify.setEnabled(question != null);
         send.setEnabled(question != null
@@ -255,7 +261,18 @@ public class GUIQuestions extends JFrame {
         }
 
         form.setEditable(true);
-        saveChanges.setEnabled(true);
+        setEditing(true);
+        show("Edición activada: cambia lo que necesites y pulsa GUARDAR CAMBIOS.", false);
+    }
+
+    /** Switches the main edit button between MODIFICAR and GUARDAR CAMBIOS. */
+    private void setEditing(boolean value) {
+        editing = value;
+        modify.setText(value ? "GUARDAR CAMBIOS" : "MODIFICAR");
+        // Sending while there are unsaved edits would send the old version.
+        if (value) {
+            send.setEnabled(false);
+        }
     }
 
     private void saveChanges() {
@@ -274,6 +291,8 @@ public class GUIQuestions extends JFrame {
                 saved -> {
                     JOptionPane.showMessageDialog(this,
                             "Modificación guardada y validada correctamente.");
+                    form.setEditable(false);
+                    setEditing(false);
                     refresh(saved.id());
                 },
                 error -> JOptionPane.showMessageDialog(this,
